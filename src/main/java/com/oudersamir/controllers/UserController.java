@@ -24,10 +24,11 @@ import com.oudersamir.entities.UserEntity;
 import com.oudersamir.exception.BusinessResourceException;
 import com.oudersamir.requests.UserRequest;
 import com.oudersamir.responses.UserResponse;
+import com.oudersamir.security.SecurityConstants;
 import com.oudersamir.service.UserService;
 
 @RestController
-@RequestMapping("/user/*")
+@RequestMapping(SecurityConstants.SIGN_UP_URL+"/*")
 public class UserController {
 	@Autowired
 	private UserService userService;
@@ -45,7 +46,7 @@ public class UserController {
 }
 	
 	
-	@PostMapping("/users")
+	@PostMapping("/register")
 	@Transactional
 	public ResponseEntity<UserResponse> saveUser(@RequestBody UserRequest userRequest){
 		if(!userRequest.getPassword().equals(userRequest.getConfirmPassword()))
