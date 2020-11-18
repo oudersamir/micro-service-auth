@@ -26,6 +26,7 @@ public class AuthorizationFilter  extends OncePerRequestFilter {
 			HttpServletResponse res, FilterChain filter)
 			throws ServletException, IOException {
 		
+
 		res.addHeader("Access-Control-Allow-Origin", "*");
 		res.addHeader("Access-Control-Allow-Headers", "Origin, Accept, "
 				+ "X-Requested-With,Content-Type, Access-Control-Request-Method, Access-Control-RequestHeaders,authorization");
@@ -34,24 +35,23 @@ public class AuthorizationFilter  extends OncePerRequestFilter {
 		res.addHeader("Access-Control-Allow-Methods", "GET,POST,DELETE,PUT,PATCH");
 		
 		if(req.getMethod().equals("OPTIONS")){
-			res.setStatus(HttpServletResponse.SC_OK);
-		}
-		
-		else if(req.getRequestURI().equals(SecurityConstants.SIGN_UP_URL+"/login")){
+		res.setStatus(HttpServletResponse.SC_OK);
+		}else if(req.getRequestURI().equals(SecurityConstants.SIGN_UP_URL+"/login")){
 			filter.doFilter(req, res);
 			return ;
 		}
 		else {
-		
+			
 			String jwt=req.getHeader(SecurityConstants.HEADER_STRING);
 			
 			if(jwt==null || !jwt.startsWith(SecurityConstants.TOKEN_PREFIX)){
+                System.out.println(jwt);
 				filter.doFilter(req, res);
 				return;
 			}
-			DecodedJWT decodeJWT=JWT.decode(jwt.substring(SecurityConstants.TOKEN_PREFIX.length(), jwt.length()));
-			String username=decodeJWT.getSubject();
-			List<String> roles=decodeJWT.getClaims().get("roles").asList(String.class);
+			DecodedJWT decodedJWT=JWT.decode(jwt.substring(SecurityConstants.TOKEN_PREFIX.length(), jwt.length()));
+			String username=decodedJWT.getSubject();
+			List<String> roles=decodedJWT.getClaims().get("roles").asList(String.class);
 			Collection<GrantedAuthority> authorities=new ArrayList<GrantedAuthority> ();
 			roles.forEach(role->{
 				authorities.add(new SimpleGrantedAuthority(role));

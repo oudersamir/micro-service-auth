@@ -34,15 +34,16 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 	http.csrf().disable();
-    http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
     http.authorizeRequests().antMatchers(HttpMethod.GET,"/").permitAll();
-    http.authorizeRequests().antMatchers(HttpMethod.POST,SecurityConstants.SIGN_UP_URL+"/login").permitAll();
-    http.authorizeRequests().antMatchers(HttpMethod.POST,SecurityConstants.SIGN_UP_URL+"/users/login").permitAll();
-    http.authorizeRequests().antMatchers(HttpMethod.POST,SecurityConstants.SIGN_UP_URL+"/users").permitAll();
+    http.authorizeRequests().antMatchers(HttpMethod.GET,SecurityConstants.SIGN_UP_URL+"/users").hasAuthority("ADMIN");
+    http.authorizeRequests().antMatchers(SecurityConstants.SIGN_UP_URL+"/login/**").permitAll();
+    http.authorizeRequests().antMatchers(HttpMethod.POST,SecurityConstants.SIGN_UP_URL+"/register").permitAll();
     http.authorizeRequests().antMatchers(HttpMethod.PUT,SecurityConstants.SIGN_UP_URL+"/users").hasAnyRole("USER","ADMIN");
     http.authorizeRequests().anyRequest().authenticated();
-    http.addFilter(getAuthenticationFilter())
-	.addFilterBefore(new AuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
+    http.addFilter(new AuthenticationFilter(authenticationManager()))
+	.addFilterBefore(new AuthorizationFilter(), UsernamePasswordAuthenticationFilter.class).
+	sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+
 
 	}
 //	@Override

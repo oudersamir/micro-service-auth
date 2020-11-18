@@ -21,6 +21,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.oudersamir.entities.UserEntity;
 import com.oudersamir.requests.UserRequest;
 
 public class AuthenticationFilter  extends UsernamePasswordAuthenticationFilter{
@@ -33,16 +34,16 @@ public class AuthenticationFilter  extends UsernamePasswordAuthenticationFilter{
 	@Override
 	public Authentication attemptAuthentication(HttpServletRequest request,
 			HttpServletResponse response) throws AuthenticationException {
-		UserRequest userRequest;	
+		UserEntity user;	
 		try {
-			userRequest= new ObjectMapper().readValue(request.getInputStream(),UserRequest.class);
+			user= new ObjectMapper().readValue(request.getInputStream(),UserEntity.class);
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new RuntimeException(e);
 		}
 		return authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-				userRequest.getUserName(),
-				userRequest.getPassword()
+				user.getUserName(),
+				user.getPassword()
 				));
 	}
 	
@@ -50,7 +51,6 @@ public class AuthenticationFilter  extends UsernamePasswordAuthenticationFilter{
 	protected void successfulAuthentication(HttpServletRequest request,
 			HttpServletResponse response, FilterChain chain,
 			Authentication authResult) throws IOException, ServletException {
-		super.successfulAuthentication(request, response, chain, authResult);
 		
 		User user=(User)authResult.getPrincipal();
 		List<String> roles=new ArrayList<String>();
@@ -64,9 +64,12 @@ public class AuthenticationFilter  extends UsernamePasswordAuthenticationFilter{
 				.withArrayClaim("roles",roles.toArray(new String[roles.size()]))
 				.withExpiresAt(new Date(System.currentTimeMillis()+SecurityConstants.EXPIRATION_TIME))
 				.sign(Algorithm.HMAC256(SecurityConstants.TOKEN_SECRET));
-		
 		response.addHeader(SecurityConstants.HEADER_STRING, SecurityConstants.TOKEN_PREFIX+jwt);
+        
+    
 		System.out.println(response.getHeader(SecurityConstants.HEADER_STRING));
+		System.out.println(response.getWriter().toString());
+
 
 	}
 }
