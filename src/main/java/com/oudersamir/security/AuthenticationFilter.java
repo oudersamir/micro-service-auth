@@ -10,6 +10,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.oudersamir.SpringApplicationContext;
+import com.oudersamir.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -26,6 +29,8 @@ import com.oudersamir.requests.UserRequest;
 
 public class AuthenticationFilter  extends UsernamePasswordAuthenticationFilter{
 	private  AuthenticationManager authenticationManager;
+
+
 	public AuthenticationFilter(AuthenticationManager authenticationManager){
 	this.authenticationManager=authenticationManager;
 	}
@@ -57,18 +62,22 @@ public class AuthenticationFilter  extends UsernamePasswordAuthenticationFilter{
 		user.getAuthorities().forEach(role->{
 			roles.add(role.getAuthority());
 		});
-		
+		UserService userService =(UserService) SpringApplicationContext.getBean("userServiceImpl");
+
+		UserEntity userEntity = userService.findByUserName(user.getUsername()).get();
 		String jwt=JWT.create()
 				.withIssuer(request.getRequestURI())
 				.withSubject(user.getUsername())
+				.withClaim("id",userEntity.getUserId())
 				.withArrayClaim("roles",roles.toArray(new String[roles.size()]))
 				.withExpiresAt(new Date(System.currentTimeMillis()+SecurityConstants.EXPIRATION_TIME))
 				.sign(Algorithm.HMAC256(SecurityConstants.TOKEN_SECRET));
 		response.addHeader(SecurityConstants.HEADER_STRING, SecurityConstants.TOKEN_PREFIX+jwt);
-        
-    
-		System.out.println(response.getHeader(SecurityConstants.HEADER_STRING));
-		System.out.println(response.getWriter().toString());
+		String rolesString=new ObjectMapper().writeValueAsString(roles);
+		response.getWriter().write("{\"token\": \"" + jwt + "\"" +
+				", \"id\": \""+ userEntity.getUserId() + "\"," +
+				" \"roles\": "+ rolesString + "}");
+
 
 
 	}

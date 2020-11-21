@@ -14,10 +14,8 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
+
 @Entity
 @Table(name="users")
 @Data
@@ -42,6 +40,11 @@ public class UserEntity  implements Serializable{
 	private String userId;
 	@Column(nullable=false,length=50,unique=true)
 	private String userName;
+
+	public boolean isActivated() {
+		return activated;
+	}
+
 	@Column(nullable=false)
 	private String password;
 	@Column(nullable=false,length=50,unique=true)
