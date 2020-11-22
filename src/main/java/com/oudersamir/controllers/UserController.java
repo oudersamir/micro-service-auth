@@ -6,11 +6,14 @@ import java.util.Collection;
 
 import java.util.HashSet;
 
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,12 +30,14 @@ import com.oudersamir.responses.UserResponse;
 import com.oudersamir.security.SecurityConstants;
 import com.oudersamir.service.UserService;
 
+import javax.validation.Valid;
+@Validated
 @RestController
 @RequestMapping(SecurityConstants.SIGN_UP_URL+"/*")
 public class UserController {
 	@Autowired
 	private UserService userService;
-	
+	@ApiOperation(value=" method to retrieve all users ")
 	@GetMapping("/users")
 	public ResponseEntity<Collection<UserResponse>> getAllUsers(){
 			Collection<UserEntity> users=userService.getAllUser();
@@ -44,11 +49,12 @@ public class UserController {
 			}
 	return new ResponseEntity<Collection<UserResponse>>(usersResponse,HttpStatus.FOUND);
 }
-	
-	
+
+	@ApiOperation(value=" methode to create a user")
 	@PostMapping("/register")
 	@Transactional
-	public ResponseEntity<UserResponse> saveUser(@RequestBody UserRequest userRequest){
+	public ResponseEntity<UserResponse> saveUser(@Valid @RequestBody  @ApiParam("user info to persist") UserRequest userRequest)
+		{
 		if(!userRequest.getPassword().equals(userRequest.getConfirmPassword()))
 			throw new BusinessResourceException("PasswordNotConfirmed", "mote de passe incorrect"
 					, HttpStatus.NOT_ACCEPTABLE);	
@@ -59,26 +65,26 @@ public class UserController {
 		UserResponse userResponse= modelMapper.map(user,UserResponse.class);	
 		return new ResponseEntity<UserResponse>(userResponse,HttpStatus.CREATED);
 	}
-	
-	
-	
+
+
+	@ApiOperation(value=" methode to update a user")
 	@PutMapping("/users")
-	public ResponseEntity<UserResponse> updateUser(@RequestBody UserRequest userRequest){
+	public ResponseEntity<UserResponse> updateUser(@RequestBody   @ApiParam("user info to update") UserRequest userRequest){
 		ModelMapper modelMapper=new ModelMapper();
 		UserEntity userEntity=modelMapper.map(userRequest, UserEntity.class);
 		UserEntity user=userService.saveOrUpdate(userEntity);
 		UserResponse userResponse= modelMapper.map(user,UserResponse.class);	
 		return new ResponseEntity<UserResponse>(userResponse,HttpStatus.OK);
 	}
-	
-	
+
+	@ApiOperation(value=" methode to delete a user")
 	@DeleteMapping("/users/{userId}")
-	public ResponseEntity<Void> deleteUser(@PathVariable(value="userId",required=true) String userId)
+	public ResponseEntity<Void> deleteUser(@PathVariable(value="userId",required=true)   @ApiParam("user Id (PUBLIC ID)") String userId)
 	throws BusinessResourceException{
 		userService.deleteUser(userId);
 		return new ResponseEntity<Void>(HttpStatus.GONE);
 	}
-	
+	@ApiOperation(value=" methode to get user by username and password")
 	@PostMapping("/users/login")
 	public ResponseEntity<UserResponse> findUserByUserNameAndPassword(@RequestBody UserRequest userRequest){
 	UserEntity userEntity=	userService.findByUserNameAndPassword(userRequest.getUserName(),
@@ -87,10 +93,10 @@ public class UserController {
 	UserResponse userResponse=modelMapper.map(userEntity, UserResponse.class);
 		return new ResponseEntity<UserResponse>(userResponse,HttpStatus.FOUND);
 	}
-	
-	
+
+	@ApiOperation(value=" methode to get user by UserId ")
 	@GetMapping("/users/{userId}")
-	public ResponseEntity<UserResponse> findByUserId(@PathVariable(value="userId") String userId){
+	public ResponseEntity<UserResponse> findByUserId(@PathVariable(value="userId")  @ApiParam("user Id (PUBLIC ID)") String userId){
 		ModelMapper modelMapper=new ModelMapper();
 		UserEntity userEntity=userService.findByUserId(userId).get();
 		UserResponse userResponse=modelMapper.map(userEntity, UserResponse.class);
