@@ -30,7 +30,7 @@ import com.oudersamir.shared.Utils;
 public class UserServiceImpl implements UserService{
 	private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 	
-	@Autowired
+	//@Autowired
 	private Utils utils;
 	private UserRepository userRepository;
 	private RoleRepository roleRepository;
@@ -39,11 +39,12 @@ public class UserServiceImpl implements UserService{
 	@Autowired
 	public UserServiceImpl(UserRepository userRepository,
 		com.oudersamir.dao.RoleRepository roleRepository,
-		BCryptPasswordEncoder bCryptPasswordEncoder) {
+		BCryptPasswordEncoder bCryptPasswordEncoder,Utils utils) {
 	super();
 	this.userRepository = userRepository;
 	this.roleRepository = roleRepository;
 	this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+	this.utils=utils;
 }
 
 	@Override
@@ -125,6 +126,7 @@ public class UserServiceImpl implements UserService{
 		// TODO Auto-generated method stub
 		try{
 			UserEntity user=findByUserId(userId).get();
+			logger.info("exist user "+user);
 			userRepository.deleteById(user.getId());
 		}catch(EmptyResultDataAccessException ex){
 			logger.error(String.format("Aucun utilisateur n'existe avec l'identifiant: "+userId, ex));

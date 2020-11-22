@@ -1,7 +1,6 @@
 package com.oudersamir.doa.Test;
 
 import com.oudersamir.dao.UserRepository;
-import com.oudersamir.entities.RoleEntity;
 import com.oudersamir.entities.UserEntity;
 import org.junit.Before;
 import org.junit.Test;
@@ -10,18 +9,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
+
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.junit.Assert.*;
 import static org.hamcrest.CoreMatchers.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+
 
 @RunWith(SpringRunner.class)//permet d'établir une liaison entre JUnit et Spring
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -47,7 +43,7 @@ public class UserRepositoryTest {
     @Test
     public  void testFindAllUsers(){
       List<UserEntity> users= userRepository.findAll() ;
-      org.hamcrest.MatcherAssert.assertThat(2,is(users.size()));//on a 2 Users dans la base de donnees et un utilisateur ajouté lors du setup du test
+      org.hamcrest.MatcherAssert.assertThat(3,is(users.size()));//on a 2 Users dans la base de donnees et un utilisateur ajouté lors du setup du test
 
     }
     @Test
